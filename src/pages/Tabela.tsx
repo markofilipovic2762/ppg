@@ -79,6 +79,7 @@ export default function Tabela() {
   const defaultColDef = useMemo(() => {
     return {
       floatingFilter: true,
+      filter:'agTextColumnFilter',
       flex: 1
     };
   }, []);

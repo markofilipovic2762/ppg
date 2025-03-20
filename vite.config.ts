@@ -4,6 +4,12 @@ import tailwindcss from "@tailwindcss/vite";
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: "/ppg/",
+  // server: {
+  //   https: {
+  //     key: "./key.pem",
+  //     cert: "./cert.pem",
+  //   }
+  // },
+  base: "/potrosnjagoriva/",
   plugins: [react(), tailwindcss()],
 });

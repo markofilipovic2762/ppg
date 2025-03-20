@@ -30,7 +30,7 @@ const ErrorPage = () => {
                 Žao nam je, ali stranica koju zahtevate nije pronadjena
               </p>
               <Link
-                to="/k_utovar"
+                to="/"
                 className="bg-green-400 text-xl  px-5 py-3 shadow-sm font-medium tracking-wider text-gray-50 rounded-full hover:shadow-lg"
               >
                 Vratite se na početnu stranicu

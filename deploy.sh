@@ -6,7 +6,7 @@ PASSWORD="aplikacije"
 # Definisi samo ove 2 varijable za svoju aplikaciju (build folder aplikacije i naziv aplikacije):
 
 BUILD_DIR="D:\marko\ppg\dist\*"
-APP_NAME="ppg"
+APP_NAME="potrosnjagoriva"
 
 # Konfiguracija varijabli .env fajla
 FILE_ENV=".env"

@@ -1,36 +1,66 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { api } from "./config";
+import axios from "axios";
 
-export const useSkladista = () =>
+export const useGetTipoveVozila = () =>
   useQuery({
-    queryKey: ["skladista"],
+    queryKey: ["tipoviVozila"],
     queryFn: () =>
-      api()
-        .get("/skladista")
-        .then((res) => res.data),
+      axios
+        .get("https://10.21.57.48:8000/get_tip_vozila", {
+          withCredentials: true,
+        })
+        .then((res) => {
+          console.log("Tipovi vozila:", res.data);
+          return res.data;
+        })
+        .catch((err) => console.log("Greska za get tip vozila:", err)),
     gcTime: 60 * 60 * 1000,
   });
 
-export const useKupciPoSkladistu = (skladiste) =>
+export const useGetVozilaPoTipu = (id: number) =>
   useQuery({
-    queryKey: ["kupciPoSkladistu", skladiste],
+    queryKey: ["vozilaPoTipu", id],
     queryFn: () =>
       api()
-        .get(`/kupciPoSkladistu?skladiste=${skladiste}`)
+        .get(`/get_vozila/${id}`)
         .then((res) => res.data),
-    enabled: !!skladiste,
-    gcTime: 10 * 60 * 1000,
+    enabled: !!id,
+    gcTime: 60 * 1000,
   });
 
-export const useSetZavrsenKamion = (queryClient, pogon) => {
-  return useMutation({
-    mutationKey: ["zavrsen_utovar_kamiona"],
-    mutationFn: (id) =>
+export const useGetTipNorme = (id: number) =>
+  useQuery({
+    queryKey: ["tipNorme", id],
+    queryFn: () =>
       api()
-        .put("/update", id)
+        .get(`/get_tip_norme/${id}`)
         .then((res) => res.data),
-    onSettled: () => {
-      return queryClient.invalidateQueries({ queryKey: ["kamioni", pogon] });
-    },
+    enabled: !!id,
+    gcTime: 60 * 1000,
   });
-};
+
+export const useGetVozac = (mbr: string) =>
+  useQuery({
+    queryKey: ["vozac", mbr],
+    queryFn: () =>
+      api()
+        .get(`/vozac/${mbr}`)
+        .then((res) => res.data),
+    enabled: mbr.length === 5,
+    gcTime: 60 * 1000,
+    retry: 0,
+  });
+
+// export const useSetZavrsenKamion = (queryClient, pogon) => {
+//   return useMutation({
+//     mutationKey: ["zavrsen_utovar_kamiona"],
+//     mutationFn: (id) =>
+//       api()
+//         .put("/update", id)
+//         .then((res) => res.data),
+//     onSettled: () => {
+//       return queryClient.invalidateQueries({ queryKey: ["kamioni", pogon] });
+//     },
+//   });
+// };

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { api } from "../config";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function SignIn() {
   const [ad, setAd] = useState("");
@@ -32,6 +33,27 @@ export default function SignIn() {
     }
   };
 
+  // useEffect(() => {
+  //   const setCookie = () => {
+  //     axios
+  //       .get("http://localhost:5065/auth/set-cookie", { withCredentials: true })
+  //       .then((res) => {
+  //         console.log("SET COOKIE RES:", res);
+  //       });
+  //   };
+  //   const getCookie = () => {
+  //     axios
+  //       .get("http://localhost:5065/auth/get-cookie", { withCredentials: true })
+  //       .then((res) => {
+  //         console.log("GET COOKIE RES", res);
+  //       });
+  //   };
+  //   setCookie();
+  //   setTimeout(() => {
+  //     getCookie();
+  //   }, 2000);
+  // }, []);
+
   useEffect(() => {
     if (ad.length > 4) validateAd(ad);
   }, [ad]);
@@ -44,15 +66,27 @@ export default function SignIn() {
     e.preventDefault();
     if (!adError && !passwordError) {
       // Handle sign-in logic here
-      api()
-        .post("/login", { username: ad, password })
+      axios
+        .post(
+          "http://localhost:5065/auth/login",
+          {
+            username: ad,
+            password,
+            appId: 1,
+          },
+          { withCredentials: true }
+        )
         .then((res) => {
-          if (res) {
-            localStorage.setItem("accessToken/ppg", res.data.accessToken);
-            localStorage.setItem("firstName/ppg", res.data.firstName);
-            localStorage.setItem("lastName/ppg", res.data.lastName);
-            navigate("/");
-          }
+          console.log(res);
+          localStorage.setItem("rola/potrosnjaGoriva", res.data.rola);
+          localStorage.setItem("ad/potrosnjaGoriva", res.data.username);
+          localStorage.setItem(
+            "imeKorisnika/potrosnjaGoriva",
+            res.data.imeKorisnika
+          );
+        })
+        .then(() => {
+          navigate("/");
         })
         .catch((err) => {
           console.log(err);
