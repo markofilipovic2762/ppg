@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+.rag-red {
+    background-color: #cc222244;
+}
+
 .loader {
   width: 96px;
   height: 48px;

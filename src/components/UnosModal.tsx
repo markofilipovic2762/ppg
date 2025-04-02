@@ -1,5 +1,5 @@
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   useGetTipNorme,
   useGetTipoveVozila,
@@ -46,20 +46,56 @@ const UnosModal = ({ unosModalOpen, setUnosModalOpen }: UnosModalProps) => {
   const { data: tipNorme } = useGetTipNorme(Number(formData?.vozilo));
   const { data: tipoviVozila } = useGetTipoveVozila();
   const { data: vozilaPoTipu } = useGetVozilaPoTipu(Number(grupa));
-  const {data: vozacData, error: errorVozacData} = useGetVozac(formData?.vozac);
+  const { data: vozacData, error: errorVozacData } = useGetVozac(
+    formData?.vozac
+  );
+
+  useEffect(() => {
+    setFormData(initialFormData);
+  }, [unosModalOpen, grupa]);
+
+  console.log(formData);
+  console.log(tipNorme);
 
   const handleInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     >
   ) => {
-    const { name, value, type } = e.target;
+    const { name, value } = e.target;
 
     setFormData((prevData) => ({
       ...prevData,
-      [name]:
-        type === "number" ? Number(value) : type === "date" ? value : value,
+      [name]: value,
     }));
+  };
+
+  const checkUnosDisabled = () => {
+    if (!formData.vozilo || !formData.datum || !formData.litaraGoriva) {
+      console.log("Prvi uslov ispunjen");
+      return true;
+    }
+
+    if (!formData.litaraGoriva && !formData.kilometraza) {
+      console.log("Drugi uslov ispunjen");
+      return true;
+    }
+    if (tipNorme?.TIP_NORME === 2 && !formData.motosati) {
+      console.log("Treci uslov ispunjen");
+      return true;
+    }
+    if (tipNorme?.TIP_NORME === 3 && !formData.kilometraza) {
+      console.log("Cetvrti uslov ispunjen");
+      return true;
+    }
+    if (
+      tipNorme?.TIP_NORME === 1 &&
+      (!formData.kilometraza || !formData.motosati)
+    ) {
+      console.log("Peti uslov ispunjen");
+      return true;
+    }
+    return false;
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -69,9 +105,9 @@ const UnosModal = ({ unosModalOpen, setUnosModalOpen }: UnosModalProps) => {
         vozilo_id: Number(formData.vozilo),
         norma_id: tipNorme?.NORMA_ID,
         datum_tocenja: formData.datum,
-        trenutno_stanje_km: formData.kilometraza || null,
-        trenutno_stanje_h: formData.motosati || null,
-        kolicina_goriva: formData.litaraGoriva,
+        trenutno_stanje_km: Number(formData.kilometraza) || null,
+        trenutno_stanje_h: Number(formData.motosati) || null,
+        kolicina_goriva: Number(formData.litaraGoriva),
         napomena: formData.napomena,
         vozac_mbr: formData.vozac,
       })
@@ -175,9 +211,20 @@ const UnosModal = ({ unosModalOpen, setUnosModalOpen }: UnosModalProps) => {
                         id="kilometraza"
                         name="kilometraza"
                         value={formData.kilometraza}
+                        placeholder="Unesite kilometražu..."
                         onChange={handleInputChange}
                         className="shadow-sm shadow-gray-400 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                         required
+                        min={1}
+                        onInvalid={(e) => {
+                          const target = e.target as HTMLInputElement;
+                          target.title = "Ovo polje je obavezno!";
+                          if (target.validity.valueMissing) {
+                            target.setCustomValidity("Ovo polje je obavezno!");
+                          } else {
+                            target.setCustomValidity("");
+                          }
+                        }}
                       />
                     </div>
                   </div>
@@ -195,10 +242,21 @@ const UnosModal = ({ unosModalOpen, setUnosModalOpen }: UnosModalProps) => {
                         type="number"
                         id="motosati"
                         name="motosati"
+                        min={1}
                         value={formData.motosati}
                         onChange={handleInputChange}
+                        placeholder="Unesite moto sate..."
                         className="shadow-sm shadow-gray-400 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                         required
+                        onInvalid={(e) => {
+                          const target = e.target as HTMLInputElement;
+                          if (target.validity.valueMissing) {
+                            target.setCustomValidity("Ovo polje je obavezno!");
+                            target.title = "Ovo polje je obavezno!";
+                          } else {
+                            target.setCustomValidity("");
+                          }
+                        }}
                       />
                     </div>
                   </div>
@@ -215,10 +273,31 @@ const UnosModal = ({ unosModalOpen, setUnosModalOpen }: UnosModalProps) => {
                     id="litaraGoriva"
                     name="litaraGoriva"
                     type="number"
-                    min={0}
+                    placeholder="Unesite količinu.."
+                    min={1}
                     max={500}
                     value={formData.litaraGoriva}
                     onChange={handleInputChange}
+                    onInvalid={(e) => {
+                      const target = e.target as HTMLInputElement;
+                      if (target.validity.rangeUnderflow) {
+                        target.setCustomValidity(
+                          "Vrednost mora biti veća od nule."
+                        );
+                      } else if (target.validity.rangeOverflow) {
+                        target.setCustomValidity(
+                          "Vrednost mora biti manja ili jednaka 500."
+                        );
+                      } else if (target.validity.valueMissing) {
+                        target.setCustomValidity("Ovo polje je obavezno!");
+                      } else {
+                        target.setCustomValidity("");
+                      }
+                    }}
+                    onInput={(e) => {
+                      const target = e.target as HTMLInputElement; // Eksplicitno kastovanje
+                      target.setCustomValidity("");
+                    }}
                     className="shadow-sm shadow-gray-400 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   ></input>
                 </div>
@@ -233,6 +312,7 @@ const UnosModal = ({ unosModalOpen, setUnosModalOpen }: UnosModalProps) => {
                   <textarea
                     id="napomena"
                     name="napomena"
+                    placeholder="Unesite napomenu..."
                     value={formData.napomena}
                     onChange={handleInputChange}
                     className="shadow-sm shadow-gray-400 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -251,7 +331,7 @@ const UnosModal = ({ unosModalOpen, setUnosModalOpen }: UnosModalProps) => {
                       {vozacData.IME} {vozacData.PREZIME}
                     </p>
                   )}
-                  { errorVozacData && (
+                  {errorVozacData && (
                     <p className="text-red-600 text-md font-bold mb-2">
                       Vozač sa tim MBR ne postoji
                     </p>
@@ -261,10 +341,10 @@ const UnosModal = ({ unosModalOpen, setUnosModalOpen }: UnosModalProps) => {
                     name="vozac"
                     maxLength={5}
                     minLength={5}
+                    placeholder="Unesite MBR vozača..."
                     value={formData.vozac}
                     onChange={handleInputChange}
                     className="shadow-sm shadow-gray-400 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
                   />
                 </div>
                 <div className="mb-4 w-full">
@@ -278,25 +358,27 @@ const UnosModal = ({ unosModalOpen, setUnosModalOpen }: UnosModalProps) => {
                     placeholder="Odaberi datum"
                     dateFormat="yy-mm-dd"
                     className="w-full"
+                    maxDate={new Date()}
                     value={new Date(formData.datum)}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        datum: e.value?.toLocaleDateString("en-CA"),
+                        datum: e.value?.toLocaleDateString("en-CA") || "",
                       })
                     }
-                    //setFormData({ ...formData, datum: e.value.toISOString().split('T')[0] })
                     showIcon
                   />
                 </div>
                 <div className="flex items-center justify-center">
                   <Button
+                    style={{ cursor: "pointer" }}
                     icon="pi pi-check"
                     label="Unesi"
                     type="submit"
-                    severity="help"
+                    severity="success"
                     outlined
                     raised
+                    disabled={checkUnosDisabled()}
                     //className="bg-blue-500 hover:bg-blue-700 text-white hover:text-blue-800 shadow-md shadow-gray-400 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                   />
                 </div>

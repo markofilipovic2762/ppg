@@ -42,18 +42,27 @@ const IzmenaNormeModal = ({
   const { data: tipoviVozila } = useGetTipoveVozila();
   const { data: vozilaPoTipu } = useGetVozilaPoTipu(Number(grupa));
 
-  console.log(tipoviVozila);
-  console.log(tipNorme);
-
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    const { name, value, type } = e.target;
+    const { name, value } = e.target;
 
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
+  };
+
+  const checkUnosDisabled = () => {
+    if (!formData.vozilo_id) return true;
+    if (tipNorme?.TIP_NORME === 2 && !formData.potrosnja_h) return true;
+    if (tipNorme?.TIP_NORME === 3 && !formData.potrosnja_km) return true;
+    if (
+      tipNorme?.TIP_NORME === 1 &&
+      (!formData.potrosnja_h || !formData.potrosnja_km)
+    )
+      return true;
+    return false;
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -63,7 +72,7 @@ const IzmenaNormeModal = ({
         vozilo_id: Number(formData.vozilo_id),
         potrosnja_km: Number(formData.potrosnja_km),
         potrosnja_h: Number(formData.potrosnja_h),
-        tip_norme: Number(tipNorme?.NORMA_ID),
+        tip_norme: Number(tipNorme?.TIP_NORME),
       })
       .then((res) => {
         if (res.status === 200) {
@@ -116,7 +125,7 @@ const IzmenaNormeModal = ({
                   onChange={(e) => {
                     setGrupa(e.target.value);
                   }}
-                  className="shadow-md shadow-gray-400 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  className="shadow-md shadow-gray-400 cursor-pointer border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   required
                 >
                   <option value="">Izaberi grupu</option>
@@ -139,7 +148,7 @@ const IzmenaNormeModal = ({
                     value={formData.vozilo_id}
                     onChange={handleInputChange}
                     disabled={!grupa}
-                    className="shadow-md shadow-gray-400 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    className="shadow-md shadow-gray-400 cursor-pointer border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
                   >
                     <option value="">Izaberi vozilo</option>
@@ -163,6 +172,7 @@ const IzmenaNormeModal = ({
                       <input
                         type="number"
                         id="potrosnja_km"
+                        min={1}
                         name="potrosnja_km"
                         value={formData.potrosnja_km}
                         onChange={handleInputChange}
@@ -185,6 +195,7 @@ const IzmenaNormeModal = ({
                         type="number"
                         id="potrosnja_h"
                         name="potrosnja_h"
+                        min={1}
                         value={formData.potrosnja_h}
                         onChange={handleInputChange}
                         className="shadow-md shadow-gray-400 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -197,6 +208,7 @@ const IzmenaNormeModal = ({
                 <div className="flex items-center justify-center">
                   <Button
                     type="submit"
+                    disabled={checkUnosDisabled()}
                     className="bg-blue-500 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                   >
                     Unesi

@@ -1,7 +1,5 @@
 import { Link } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
-import { useNavigate, useLocation } from "react-router-dom";
-import { api } from "../config";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 
@@ -9,37 +7,29 @@ const MySwal = withReactContent(Swal);
 
 const Navbar = () => {
   const { rola, isAuthenticated } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
 
   const handleLogout = () => {
-    localStorage.removeItem("rola/potrosnjaGoriva");
-    api().post("/auth/logout").then((res) => {
-      if (res.status === 200) {
-        MySwal.fire({
-          title: "Izlogovani ste",
-          icon: "success",
-          timer: 2000,
-          timerProgressBar: true,
-          didClose: () => {
-            navigate("/login");
-          },
-        });
-      }
-    }).catch((error) => {
-      MySwal.fire({
-        title: "Greška",
-        text: error.response.data.message,
-        icon: "error",
-        timer: 2000,
-        timerProgressBar: true,
-      });
-    }); 
-    if (location.pathname !== "/") {
-      navigate("/");
-    } else {
-      navigate(0);
-    }
+    localStorage.removeItem("accessToken/potrosnjagoriva");
+    localStorage.removeItem("firstName/potrosnjagoriva");
+    localStorage.removeItem("lastName/potrosnjagoriva");
+    localStorage.removeItem("username/potrosnjagoriva");
+    localStorage.removeItem("rola/potrosnjagoriva");
+
+    MySwal.fire({
+      title: "Izlogovani ste",
+      icon: "success",
+      timer: 2000,
+      timerProgressBar: true,
+      didClose: () => {
+        window.location.href = "/potrosnjagoriva/login";
+      },
+    });
+
+    // if (location.pathname !== "/") {
+    //   navigate("/");
+    // } else {
+    //   navigate(0);
+    // }
   };
 
   return (
@@ -49,13 +39,12 @@ const Navbar = () => {
           Praćenje potrošnje goriva
         </span>
       </Link>
-      { isAuthenticated ? (
+      {isAuthenticated ? (
         <div className="flex flex-row gap-4 justify-center items-center">
           <h3 className="text-gray-100 font-semibold">
-            {/* {localStorage.getItem("firstName/ppg")}&nbsp;
-            {localStorage.getItem("lastName/ppg")} */}
-            {localStorage.getItem("imeKorisnika/potrosnjaGoriva")}
-            &nbsp;{localStorage.getItem("rola/potrosnjaGoriva")}
+            {localStorage.getItem("firstName/potrosnjagoriva")}&nbsp;
+            {localStorage.getItem("lastName/potrosnjagoriva")}&nbsp;
+            {rola.replace(/^SIT_/, "")}
           </h3>
           <button
             onClick={handleLogout}

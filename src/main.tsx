@@ -6,6 +6,7 @@ import ErrorPage from "./layout/ErrorPage.tsx";
 import RootLayout from "./layout/RootLayout.tsx";
 import SignIn from "./pages/Signin.tsx";
 import Tabela from "./pages/Tabela.tsx";
+import UnesenoTabela from "./pages/UnesenoTabela.tsx";
 
 const router = createBrowserRouter(
   [
@@ -26,8 +27,12 @@ const router = createBrowserRouter(
             },
             {
               path: "tabela",
-              element: <Tabela />
-            }
+              element: <Tabela />,
+            },
+            {
+              path: "uneseno",
+              element: <UnesenoTabela />,
+            },
           ],
         },
       ],

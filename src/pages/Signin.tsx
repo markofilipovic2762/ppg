@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { api } from "../config";
-import { useNavigate } from "react-router-dom";
+import { prodUrl } from "../config";
 import axios from "axios";
 
 export default function SignIn() {
@@ -8,8 +7,7 @@ export default function SignIn() {
   const [password, setPassword] = useState("");
   const [adError, setAdError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-
-  const navigate = useNavigate();
+  const [greska, setGreska] = useState("");
 
   const validateAd = (ad: string) => {
     if (!ad) {
@@ -65,32 +63,30 @@ export default function SignIn() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!adError && !passwordError) {
-      // Handle sign-in logic here
       axios
-        .post(
-          "http://localhost:5065/auth/login",
-          {
-            username: ad,
-            password,
-            appId: 1,
-          },
-          { withCredentials: true }
-        )
+        .post(`${prodUrl}/login`, {
+          username: ad,
+          password,
+          //appId: 1,
+        })
         .then((res) => {
-          console.log(res);
-          localStorage.setItem("rola/potrosnjaGoriva", res.data.rola);
-          localStorage.setItem("ad/potrosnjaGoriva", res.data.username);
           localStorage.setItem(
-            "imeKorisnika/potrosnjaGoriva",
-            res.data.imeKorisnika
+            "accessToken/potrosnjagoriva",
+            res.data.accessToken
           );
+          localStorage.setItem("firstName/potrosnjagoriva", res.data.firstName);
+          localStorage.setItem("lastName/potrosnjagoriva", res.data.lastName);
+          localStorage.setItem("username/potrosnjagoriva", res.data.username);
+          localStorage.setItem("rola/potrosnjagoriva", res.data.adGroup);
         })
         .then(() => {
-          navigate("/");
+          window.location.href = "/potrosnjagoriva/";
         })
         .catch((err) => {
-          console.log(err);
-          alert("Doslo je do greske prilikom logovanja");
+          setGreska(err.response.data.detail);
+          setTimeout(() => {
+            setGreska(""); // Ažuriranje state-a
+          }, 3000);
         });
     }
   };
@@ -138,6 +134,7 @@ export default function SignIn() {
             {passwordError && (
               <p className="mt-1 text-xs text-red-500">{passwordError}</p>
             )}
+            {greska && <p className="mt-3 text-md text-red-500">{greska}</p>}
           </div>
           <button
             type="submit"

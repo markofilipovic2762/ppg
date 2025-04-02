@@ -1,19 +1,13 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { api } from "./config";
-import axios from "axios";
 
 export const useGetTipoveVozila = () =>
   useQuery({
     queryKey: ["tipoviVozila"],
     queryFn: () =>
-      axios
-        .get("https://10.21.57.48:8000/get_tip_vozila", {
-          withCredentials: true,
-        })
-        .then((res) => {
-          console.log("Tipovi vozila:", res.data);
-          return res.data;
-        })
+      api()
+        .get("/get_tip_vozila")
+        .then((res) => res.data)
         .catch((err) => console.log("Greska za get tip vozila:", err)),
     gcTime: 60 * 60 * 1000,
   });
@@ -50,6 +44,26 @@ export const useGetVozac = (mbr: string) =>
     enabled: mbr.length === 5,
     gcTime: 60 * 1000,
     retry: 0,
+  });
+
+export const useGetReport = () =>
+  useQuery({
+    queryKey: ["report"],
+    queryFn: () =>
+      api()
+        .get("/reporting")
+        .then((res) => res.data),
+    gcTime: 60 * 1000,
+  });
+
+export const useUnosReport = () =>
+  useQuery({
+    queryKey: ["unosReporting"],
+    queryFn: () =>
+      api()
+        .get("/unos_reporting")
+        .then((res) => res.data),
+    gcTime: 60 * 1000,
   });
 
 // export const useSetZavrsenKamion = (queryClient, pogon) => {
